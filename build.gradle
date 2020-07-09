@@ -22,14 +22,24 @@ repositories {
 
 dependencies {
     // This dependency is used by the application.
-    implementation 'com.google.guava:guava:29.0-jre'
-    implementation group: 'org.apache.poi', name: 'poi', version: '4.1.2'
-    implementation group: 'com.diogonunes', name: 'JColor', version: '5.0.0'
-
+    compile 'com.google.guava:guava:29.0-jre'
+    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2'
+    compile group: 'com.diogonunes', name: 'JColor', version: '5.0.0'
+    compile group: 'net.sourceforge.argparse4j', name: 'argparse4j', version: '0.8.1'
 
 }
 
 application {
     // Define the main class for the application.
     mainClassName = 'com.troy.cwteams.Main'
+}
+
+jar {
+    manifest {
+        attributes "Main-Class": "com.troy.cwteams.Main"
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
