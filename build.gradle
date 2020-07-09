@@ -23,10 +23,13 @@ repositories {
 dependencies {
     // This dependency is used by the application.
     implementation 'com.google.guava:guava:29.0-jre'
+    implementation group: 'org.apache.poi', name: 'poi', version: '4.1.2'
+    implementation group: 'com.diogonunes', name: 'JColor', version: '5.0.0'
+
 
 }
 
 application {
     // Define the main class for the application.
-    mainClassName = 'CWTeams.App'
+    mainClassName = 'com.troy.cwteams.Main'
 }
