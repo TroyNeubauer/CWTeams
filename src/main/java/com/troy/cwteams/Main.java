@@ -49,6 +49,10 @@ class Main
 				.dest("limitCount").setDefault(1000).type(Integer.class)
 				.help("Sets a limit for the max number of permeated teams to be generated");
 
+		parser.addArgument("--teams")
+				.dest("teams").setDefault(5).type(Integer.class)
+				.help("How many teams should be made the bundle of players");
+
 		try
 		{
 			Namespace res = parser.parseArgs(args);
@@ -64,9 +68,13 @@ class Main
 			List<CWPlayer> players = RatingsReader.parsePlayers(cwFile);
 
 			double maxDev = res.get("maxDev");
-			int limitCount = res.get("limitCount");
+			int limitOutput = res.get("limitCount");
+			int teamCount = res.get("teams");
+
 			info("Using a max deviation of " + maxDev);
-			info("Limiting output to " + limitCount + " permutations");
+			info("Limiting output to " + limitOutput + " permutations");
+			info("Generating " + teamCount + " for a total playerbase of " + players.size() + " players");
+			GenerateTeams.gen(players, maxDev, limitOutput, teamCount);
 
 		}
 		catch (ArgumentParserException e)
