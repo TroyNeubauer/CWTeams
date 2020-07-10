@@ -2,10 +2,26 @@
 Insert blabbery Chas paragraph here
 
 # Getting started
-In order to build and run Cake Wars Teams, you will need to install a few dependencies
+In order to build and run Cake Wars Teams, you will need to install a few dependencies:
+
+Java: Can be downlaoded here https://www.java.com/ES/download/. Java is the language of choice for this project 
+
+Gradle: Can be downlaoded here https://gradle.org/install/. Gradle is used as the build system to compile the code and manage the dependencies for this project
+
+Git: Can be downlaoded here https://git-scm.com/downloads. Git allows you to download the source code from this repository and get updates as new commits are pushed
+
+# Building
+Once the dependencies are met, open a [command prompt](https://tutorial.djangogirls.org/en/intro_to_command_line) and type 'git clone https://github.com/TroyNeubauer/CWTeams.git'. This will download the soource code to your local machine. If you get an error that git cant be found then double check that you added it your path or try restarting your terminal.
+Run 'cd CWTeams'
+and run `gradlew.bat jar` (windows) or `./gradlew jar` (OSX and Linux).
+
+This should print some output indicating the program was compiled successfully.
+There should noiw be an executable jar file inside build/libs.
+
 
 # Usage
 This utility comes with many command line arguments that allow you to tweak the resulting teams to your liking.
+After building, run `java -jar build/libs/CWTeams.jar`
 
 By default this program will look for a ratings file named `cw.xlsx` in the current directory. This can be overridden with `--file=other_cake_wars_file.xlsx` to make the program read `other_cake_wars_file.xlsx` instead.
 
