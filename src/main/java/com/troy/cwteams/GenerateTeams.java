@@ -109,10 +109,10 @@ public class GenerateTeams
 
 		printResults(output, players, teamSizes);
 		double seconds = (System.currentTimeMillis() - start) / 1000.0;
-		Main.info("Generated " + combinationsTried.size() + " valid team possibilities in " + NumberFormat.getInstance().format(seconds) + " seconds");
-		Main.info("Evaluated " + NumberFormat.getInstance().format(comboCount) + " possible configurations");
-		Main.info("That's " + NumberFormat.getInstance().format(comboCount / seconds) + " configurations/second (" + NumberFormat.getInstance().format(seconds / comboCount * 1000_000_000.0) + " nano seconds / configuration) evaluated");
-		Main.info("Of the " + NumberFormat.getInstance().format(comboCount) + " attempted configurations, " +
+		Main.success("Generated " + combinationsTried.size() + " valid team possibilities in " + NumberFormat.getInstance().format(seconds) + " seconds");
+		Main.success("Evaluated " + NumberFormat.getInstance().format(comboCount) + " possible configurations");
+		Main.success("That's " + NumberFormat.getInstance().format(comboCount / seconds) + " configurations/second (" + NumberFormat.getInstance().format(seconds / comboCount * 1000_000_000.0) + " nano seconds / configuration) evaluated");
+		Main.success("Of the " + NumberFormat.getInstance().format(comboCount) + " attempted configurations, " +
 				NumberFormat.getInstance().format(teamValueFailedCount) + " had a value out of range, and " +
 				NumberFormat.getInstance().format(playerRestrictionsFailedCount) + " failed the restriction requirements");
 	}

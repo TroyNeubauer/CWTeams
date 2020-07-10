@@ -110,10 +110,10 @@ class Main
 			String outputFile = res.get("outputFile");
 			PrintStream output = createOutput(outputFile);
 
-			info("Using a max deviation of " + maxDev + " rating points");
+			info("Using a max deviation of +-" + maxDev + " rating points");
 			info("Using a timeout of " + timeout + " seconds");
 			info("Limiting output to " + limitOutput + " permutations");
-			info("Generating " + teamCount + " for a total playerbase of " + players.size() + " players");
+			info("Generating " + teamCount + "teams with a total playerbase of " + players.size() + " players");
 			GenerateTeams.gen(players, restrictions, maxDev, limitOutput, teamCount, output, sort, timeout);
 			if (outputFile != null)
 			{
