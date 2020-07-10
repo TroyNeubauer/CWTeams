@@ -73,7 +73,7 @@ public class GenerateTeams
 				if (System.currentTimeMillis() - singleStart > TIMEOUT)
 				{
 					printResults(output, players, teamSizes);
-					Main.fatal("Failed to find team more combination after " + (TIMEOUT / 1000) + " seconds! Tried " + comboCount + " combinations to no avail");
+					Main.fatal("Failed to find more team combination after " + (TIMEOUT / 1000) + " seconds! Tried " + comboCount + " combinations to no avail");
 				}
 				shuffel(tempPlayers);
 				comboCount++;
