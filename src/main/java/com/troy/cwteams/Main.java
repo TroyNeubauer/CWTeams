@@ -22,18 +22,23 @@ class Main
 {
 	public static void error(String message)
 	{
-		System.out.println(Ansi.colorize("CWTeams: " + message, Attribute.BLACK_BACK(), Attribute.RED_BACK()));
+		System.out.println(Ansi.colorize("CWTeams: " + message, Attribute.BLACK_TEXT(), Attribute.RED_BACK()));
 	}
 
 	public static void fatal(String message)
 	{
-		System.out.println(Ansi.colorize("CWTeams: " + message, Attribute.BLACK_BACK(), Attribute.RED_BACK()));
+		System.out.println(Ansi.colorize("CWTeams: " + message, Attribute.BLACK_TEXT(), Attribute.RED_BACK()));
 		System.exit(1);
 	}
 
 	public static void info(String message)
 	{
 		System.out.println("CWTeams: " + message);
+	}
+
+	public static void success(String message)
+	{
+		System.out.println(Ansi.colorize("CWTeams: ", Attribute.GREEN_TEXT()) + message);
 	}
 
 	public static void warn(String message)
@@ -61,19 +66,23 @@ class Main
 
 		parser.addArgument("--teams", "-t")
 				.dest("teams").setDefault(5).type(Integer.class)
-				.help("How many teams should be made the bundle of players");
+				.help("How many teams should be made from the bundle of players");
 
 		parser.addArgument("--separate", "-r")
 				.dest("restrictions").nargs("+")
-				.help("How many teams should be made the bundle of players");
+				.help("Indicates a binary seperation between two players using a colon. using --separate troy:chas will force the algorithm to make teams where chas and troy are on different teams");
 
 		parser.addArgument("--output", "-o")
 				.dest("outputFile")
 				.help("Write the list of teams to the specified file");
 
 		parser.addArgument("--sort", "-s")
-				.type(Boolean.class).setDefault(true)
+				.dest("sort").type(Boolean.class).setDefault(true)
 				.help("Waits until the program terminates to print the output (sorted from worst to best)");
+
+		parser.addArgument("--timeout")
+				.dest("timeout").setDefault(15).type(Integer.class)
+				.help("How long the program can generate no more teams for until it exits");
 
 
 		try
@@ -85,7 +94,7 @@ class Main
 			{
 				fatal("Failed to find file \"" + fileStr + "\"");
 			}
-			info("Found input file \"" + fileStr + "\"");
+			success("Found input file \"" + fileStr + "\"");
 
 			List<CWPlayer> players = RatingsReader.parsePlayers(cwFile);
 			List<PlayerRestrictor.PlayerRestriction> restrictions = PlayerRestrictor.restrict(players, res.get("restrictions"));
@@ -94,16 +103,18 @@ class Main
 			int limitOutput = res.get("limitCount");
 			int teamCount = res.get("teams");
 			boolean sort = res.get("sort");
+			int timeout = res.get("timeout");
 			info(sort ? "Sorting results" : "Not sorting results");
 
 
 			String outputFile = res.get("outputFile");
 			PrintStream output = createOutput(outputFile);
 
-			info("Using a max deviation of " + maxDev);
+			info("Using a max deviation of " + maxDev + " rating points");
+			info("Using a timeout of " + timeout + " seconds");
 			info("Limiting output to " + limitOutput + " permutations");
 			info("Generating " + teamCount + " for a total playerbase of " + players.size() + " players");
-			GenerateTeams.gen(players, restrictions, maxDev, limitOutput, teamCount, output, sort);
+			GenerateTeams.gen(players, restrictions, maxDev, limitOutput, teamCount, output, sort, timeout);
 			if (outputFile != null)
 			{
 				output.close();

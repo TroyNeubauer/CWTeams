@@ -20,7 +20,7 @@ public class RatingsReader
 		{
 			FileInputStream inputStream = new FileInputStream(cwFile);
 			Workbook workbook = new XSSFWorkbook(inputStream);
-			Main.info("Opened excel file successfully!");
+			Main.success("Opened excel file successfully!");
 
 			if (workbook.getNumberOfSheets() > 1)
 			{
@@ -41,10 +41,10 @@ public class RatingsReader
 				double gamesense = getDouble(sheet, rowIndex, gamesenseCol);
 				double teamwork = getDouble(sheet, rowIndex, teamworkCol);
 				String realName = names.getFirst(), username = names.getSecond();
-				Main.info("Read Player " + realName + " (" + username + ") pvp: " + pvp + ", gamesense: " + gamesense + ", teamwork: " + teamwork);
+				Main.success("Read Player " + realName + " (" + username + ") pvp: " + pvp + ", gamesense: " + gamesense + ", teamwork: " + teamwork);
 				result.add(new CWPlayer(names.getFirst(), names.getSecond(), pvp, gamesense, teamwork));
 			}
-			Main.info("Successfully read " + playersRows.size() + " players");
+			Main.success("Successfully read " + playersRows.size() + " players");
 
 			workbook.close();
 		}
@@ -130,7 +130,7 @@ public class RatingsReader
 			{
 				if (cell.getStringCellValue().startsWith(headerName))
 				{
-					Main.info("Found header: " + headerName + " at column index #" + cell.getColumnIndex());
+					Main.success("Found header: " + headerName + " at column index #" + cell.getColumnIndex());
 					return cell.getColumnIndex();
 				}
 			}

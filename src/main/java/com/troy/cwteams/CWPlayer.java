@@ -1,6 +1,6 @@
 package com.troy.cwteams;
 
-public class CWPlayer
+public class CWPlayer implements Comparable<CWPlayer>
 {
 	public final String realName;
 	public final String username;
@@ -22,5 +22,11 @@ public class CWPlayer
 	{
 		//Average
 		return (pvp + gamesense + teamwork) / 3.0;
+	}
+
+	@Override
+	public int compareTo(CWPlayer cwPlayer)
+	{
+		return Double.compare(this.getOverall(), cwPlayer.getOverall());
 	}
 }

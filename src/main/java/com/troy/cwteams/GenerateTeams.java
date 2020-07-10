@@ -10,8 +10,9 @@ public class GenerateTeams
 	private static long teamValueFailedCount = 0, playerRestrictionsFailedCount = 0;
 	private static List<int[]> teamResults = new ArrayList<int[]>();
 
-	public static void gen(List<CWPlayer> players, List<PlayerRestrictor.PlayerRestriction> restrictions, double maxDev, int limitOutput, int teamCount, PrintStream output, boolean sort)
+	public static void gen(List<CWPlayer> players, List<PlayerRestrictor.PlayerRestriction> restrictions, double maxDev, int limitOutput, int teamCount, PrintStream output, boolean sort, int timeoutSeconds)
 	{
+		final long TIMEOUT = timeoutSeconds * 1000;
 		int[] teamSizes = new int[teamCount];
 		for (int i = 0; i < players.size(); i++)
 		{
@@ -67,13 +68,12 @@ public class GenerateTeams
 			shuffel(tempPlayers);
 			comboCount++;
 			long singleStart = System.currentTimeMillis();
-			final long TIMEOUT = 15 * 1000;
 			while (!areTeamsValid(players, restrictions, tempPlayers, teamSizes, averageTeamRaking, maxDev))
 			{
 				if (System.currentTimeMillis() - singleStart > TIMEOUT)
 				{
 					printResults(output, players, teamSizes);
-					Main.fatal("Failed to find team combination after " + (TIMEOUT / 1000) + " seconds! Tried " + comboCount + " combinations to no avail");
+					Main.fatal("Failed to find team more combination after " + (TIMEOUT / 1000) + " seconds! Tried " + comboCount + " combinations to no avail");
 				}
 				shuffel(tempPlayers);
 				comboCount++;
@@ -91,7 +91,7 @@ public class GenerateTeams
 				}
 				else
 				{
-					printTeam(players, tempPlayers, teamSizes, output);
+					printTeam(players, tempPlayers, teamSizes, output, validOptions);
 				}
 
 			}
@@ -100,7 +100,7 @@ public class GenerateTeams
 				//Check for timeout in case we already found all possible teams
 				if (lastOption != 0 && (System.currentTimeMillis() - lastOption) > TIMEOUT)
 				{
-					Main.warn("Failed to more combinations after " + (TIMEOUT / 1000) + " seconds! Low search space? Exiting!");
+					Main.warn("Failed to find more team combinations after " + (TIMEOUT / 1000) + " seconds! Low search space? Exiting!");
 					break;
 				}
 
@@ -131,9 +131,10 @@ public class GenerateTeams
 					return 1;
 			}
 		});
+		int i = 0;
 		for (int[] tempPlayers : teamResults)
 		{
-			printTeam(players, tempPlayers, teamSizes, output);
+			printTeam(players, tempPlayers, teamSizes, output, teamResults.size() - i++);
 		}
 	}
 
@@ -172,26 +173,35 @@ public class GenerateTeams
 	}
 
 
-	private static void printTeam(List<CWPlayer> players, int[] tempPlayers, int[] teamSizes, PrintStream output)
+	private static void printTeam(List<CWPlayer> players, int[] tempPlayers, int[] teamSizes, PrintStream output, int teamSetNum)
 	{
-		output.println("TEAMS:");
+		output.println("\nTEAM-SET #" + teamSetNum + " - delta: " + NumberFormat.getInstance().format(getTeamsDeltaStrength(players, tempPlayers, teamSizes)));
 		int playerIndex = 0;
 		int teamIndex = 0;
 		while (playerIndex < tempPlayers.length)
 		{
-			output.println("\tTeam #" + (teamIndex + 1));
 			int teamSize = teamSizes[teamIndex++];
-			double teamStrength = 0.0;
-			for (int j = 0; j < teamSize; j++)
+			output.println("\tTeam #" + teamIndex + " strength " + NumberFormat.getInstance().format(getTeamStrength(players, tempPlayers, playerIndex, teamSize)));
+			int[] ordering = new int[teamSize];
+			for (int i = 0; i < ordering.length; i++)
 			{
-				CWPlayer player = players.get(tempPlayers[playerIndex++]);
+				ordering[i] = tempPlayers[playerIndex + i];
+			}
+			playerIndex += teamSize;
+			ordering = Arrays.stream(ordering).
+					boxed().
+					sorted(Comparator.comparing(players::get)). // sort ascending
+					mapToInt(i -> i).
+					toArray();
+
+			//Go in reverse to print the best players first
+			for (int j = teamSize - 1; j >= 0; j--)
+			{
+				CWPlayer player = players.get(ordering[j]);
 				output.println("\t\t" + player.realName + " (" + player.username + ")");
-				teamStrength += player.getOverall();
 			}
 
-			output.println("\tTEAM Strength: " + teamStrength + "\n");
 		}
-		output.println("\tMAX delta: " + getTeamsDeltaStrength(players, tempPlayers, teamSizes));
 	}
 
 	private static Long getTeamsHash(List<CWPlayer> players, int[] tempPlayers, int[] teamSizes)
