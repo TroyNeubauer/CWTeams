@@ -63,8 +63,7 @@ public class RatingsReader
 		int space = rawName.indexOf(' ');
 		if (space == -1)
 		{
-			Main.error("Failed to find space in the name of player:" + rawName);
-			System.exit(1);
+			Main.fatal("Failed to find space in the name of player:" + rawName);
 		}
 		return new Pair<String, String>(rawName.substring(0, space), rawName.substring(space + 1, rawName.length()));
 	}
@@ -74,14 +73,12 @@ public class RatingsReader
 		Row row = sheet.getRow(rowIndex);
 		if (row == null)
 		{
-			Main.error("Failed to find row #" + rowIndex + " in sheet " + sheet.getSheetName());
-			System.exit(1);
+			Main.fatal("Failed to find row #" + rowIndex + " in sheet " + sheet.getSheetName());
 		}
 		Cell cell = row.getCell(colIndex);
 		if (cell == null)
 		{
-			Main.error("Failed to find col #" + colIndex + " in row # " + rowIndex + " in sheet " + sheet.getSheetName());
-			System.exit(1);
+			Main.fatal("Failed to find col #" + colIndex + " in row # " + rowIndex + " in sheet " + sheet.getSheetName());
 		}
 		return cell;
 	}

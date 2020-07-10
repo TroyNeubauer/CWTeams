@@ -1,16 +1,16 @@
 package com.troy.cwteams;
 
-import com.google.common.primitives.UnsignedInts;
-
+import java.io.PrintStream;
 import java.text.NumberFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class GenerateTeams
 {
 
+	private static long teamValueFailedCount = 0, playerRestrictionsFailedCount = 0;
+	private static List<int[]> teamResults = new ArrayList<int[]>();
 
-	public static void gen(List<CWPlayer> players, double maxDev, int limitOutput, int teamCount)
+	public static void gen(List<CWPlayer> players, List<PlayerRestrictor.PlayerRestriction> restrictions, double maxDev, int limitOutput, int teamCount, PrintStream output, boolean sort)
 	{
 		int[] teamSizes = new int[teamCount];
 		for (int i = 0; i < players.size(); i++)
@@ -34,8 +34,7 @@ public class GenerateTeams
 		OptionalDouble optionalAverage = players.stream().map(CWPlayer::getOverall).mapToDouble(Double::doubleValue).average();
 		if (!optionalAverage.isPresent())
 		{
-			Main.error("Players stream is empty!");
-			System.exit(1);
+			Main.fatal("Players stream is empty!");
 		}
 		double averageTeamSize = (double) players.size() / (double) teamCount;
 		double averageTeamRaking = optionalAverage.getAsDouble() * averageTeamSize;
@@ -57,19 +56,24 @@ public class GenerateTeams
 		HashSet<Long> combinationsTried = new HashSet<Long>();
 		long start = System.currentTimeMillis();
 		long lastOption = 0;
+
+		//Initialize counters to 0
 		long comboCount = 0;
+		teamValueFailedCount = 0;
+		playerRestrictionsFailedCount = 0;
+		Main.info("Searching for teams... this may take a while");
 		for (int validOptions = 0; validOptions < limitOutput; )
 		{
 			shuffel(tempPlayers);
 			comboCount++;
 			long singleStart = System.currentTimeMillis();
 			final long TIMEOUT = 15 * 1000;
-			while (!areTeamsValid(players, tempPlayers, teamSizes, averageTeamRaking, maxDev))
+			while (!areTeamsValid(players, restrictions, tempPlayers, teamSizes, averageTeamRaking, maxDev))
 			{
 				if (System.currentTimeMillis() - singleStart > TIMEOUT)
 				{
-					Main.error("Failed to find team combination after " + (TIMEOUT / 1000) + " seconds! Tried " + comboCount + " combinations to no avail");
-					System.exit(1);
+					printResults(output, players, teamSizes);
+					Main.fatal("Failed to find team combination after " + (TIMEOUT / 1000) + " seconds! Tried " + comboCount + " combinations to no avail");
 				}
 				shuffel(tempPlayers);
 				comboCount++;
@@ -81,23 +85,15 @@ public class GenerateTeams
 				lastOption = System.currentTimeMillis();
 				validOptions++;
 				combinationsTried.add(hash);
-				System.out.println("TEAMS:");
-				int playerIndex = 0;
-				int teamIndex = 0;
-				while (playerIndex < tempPlayers.length)
+				if (sort)
 				{
-					System.out.println("\tTeam #" + (teamIndex + 1));
-					int teamSize = teamSizes[teamIndex++];
-					double teamSum = 0.0;
-					for (int j = 0; j < teamSize; j++)
-					{
-						CWPlayer player = players.get(tempPlayers[playerIndex++]);
-						System.out.println("\t\t" + player.realName + " (" + player.username + ")");
-						teamSum += player.getOverall();
-					}
-
-					System.out.println("\tTEAM Strength: " + teamSum + "\n");
+					teamResults.add(Arrays.copyOf(tempPlayers, tempPlayers.length));
 				}
+				else
+				{
+					printTeam(players, tempPlayers, teamSizes, output);
+				}
+
 			}
 			else
 			{
@@ -111,10 +107,91 @@ public class GenerateTeams
 			}
 		}
 
+		printResults(output, players, teamSizes);
 		double seconds = (System.currentTimeMillis() - start) / 1000.0;
 		Main.info("Generated " + combinationsTried.size() + " valid team possibilities in " + NumberFormat.getInstance().format(seconds) + " seconds");
-		Main.info("That's " + NumberFormat.getInstance().format(comboCount / seconds) + " configurations/second (" + NumberFormat.getInstance().format(seconds / comboCount * 1000_000_000.0) + " nano seconds / configuration) evaluated");
 		Main.info("Evaluated " + NumberFormat.getInstance().format(comboCount) + " possible configurations");
+		Main.info("That's " + NumberFormat.getInstance().format(comboCount / seconds) + " configurations/second (" + NumberFormat.getInstance().format(seconds / comboCount * 1000_000_000.0) + " nano seconds / configuration) evaluated");
+		Main.info("Of the " + NumberFormat.getInstance().format(comboCount) + " attempted configurations, " +
+				NumberFormat.getInstance().format(teamValueFailedCount) + " had a value out of range, and " +
+				NumberFormat.getInstance().format(playerRestrictionsFailedCount) + " failed the restriction requirements");
+	}
+
+	private static void printResults(PrintStream output, List<CWPlayer> players, int[] teamSizes)
+	{
+		teamResults.sort(new Comparator<int[]>() {
+			@Override
+			public int compare(int[] a, int[] b) {
+				double result = getTeamsDeltaStrength(players, a, teamSizes) - getTeamsDeltaStrength(players, b, teamSizes);
+				if (result == 0.0)
+					return 0;
+				else if (result > 0.0)
+					return -1;//Invert the sign so we sort largest to smallest
+				else
+					return 1;
+			}
+		});
+		for (int[] tempPlayers : teamResults)
+		{
+			printTeam(players, tempPlayers, teamSizes, output);
+		}
+	}
+
+	public static double getTeamStrength(List<CWPlayer> players, int[] tempPlayers, int playerIndex, int teamCount)
+	{
+		double teamStrength = 0.0;
+		for (int i = playerIndex; i < playerIndex + teamCount; i++)
+		{
+			CWPlayer player = players.get(tempPlayers[i]);
+			teamStrength += player.getOverall();
+		}
+		return teamStrength;
+	}
+
+	public static double getTeamsDeltaStrength(List<CWPlayer> players, int[] tempPlayers, int[] teamSizes)
+	{
+		int playerIndex = 0;
+		int teamIndex = 0;
+		double minStrength = 0.0, maxStrength = 0.0;
+		while (playerIndex < tempPlayers.length)
+		{
+			int teamSize = teamSizes[teamIndex++];
+			double teamStrength = getTeamStrength(players, tempPlayers, playerIndex, teamSize);
+			playerIndex += teamSize;
+
+			if (minStrength == 0.0 || teamStrength < minStrength)
+			{
+				minStrength = teamStrength;
+			}
+			if (maxStrength == 0.0 || teamStrength > maxStrength)
+			{
+				maxStrength = teamStrength;
+			}
+		}
+		return maxStrength - minStrength;
+	}
+
+
+	private static void printTeam(List<CWPlayer> players, int[] tempPlayers, int[] teamSizes, PrintStream output)
+	{
+		output.println("TEAMS:");
+		int playerIndex = 0;
+		int teamIndex = 0;
+		while (playerIndex < tempPlayers.length)
+		{
+			output.println("\tTeam #" + (teamIndex + 1));
+			int teamSize = teamSizes[teamIndex++];
+			double teamStrength = 0.0;
+			for (int j = 0; j < teamSize; j++)
+			{
+				CWPlayer player = players.get(tempPlayers[playerIndex++]);
+				output.println("\t\t" + player.realName + " (" + player.username + ")");
+				teamStrength += player.getOverall();
+			}
+
+			output.println("\tTEAM Strength: " + teamStrength + "\n");
+		}
+		output.println("\tMAX delta: " + getTeamsDeltaStrength(players, tempPlayers, teamSizes));
 	}
 
 	private static Long getTeamsHash(List<CWPlayer> players, int[] tempPlayers, int[] teamSizes)
@@ -159,24 +236,30 @@ public class GenerateTeams
 
 	}
 
-	private static boolean areTeamsValid(List<CWPlayer> players, int[] tempPlayers, int[] teamSizes, double neededAverage, double maxDev)
+	private static boolean areTeamsValid(List<CWPlayer> players, List<PlayerRestrictor.PlayerRestriction> restrictions, int[] tempPlayers, int[] teamSizes, double neededAverage, double maxDev)
 	{
 		int i = 0;
 		int teamIndex = 0;
 		while (i < tempPlayers.length)
 		{
-			int teamSize = teamSizes[teamIndex++];
-			double teamSum = 0.0;
-			for (int j = 0; j < teamSize; j++)
-			{
-				teamSum += players.get(tempPlayers[i++]).getOverall();
-			}
+			final int teamSize = teamSizes[teamIndex++];
+			double teamStrength = getTeamStrength(players, tempPlayers, i, teamSize);
 			//Make sure this team is within range of the max deviation
-			if (Math.abs(neededAverage - teamSum) > maxDev)
+			if (Math.abs(neededAverage - teamStrength) > maxDev)
 			{
 				//This team is too good or too bad...
+				teamValueFailedCount++;
 				return false;
 			}
+			for (PlayerRestrictor.PlayerRestriction restriction : restrictions)
+			{
+				if (!restriction.isValidTeam(players, tempPlayers, i, teamSize))
+				{
+					playerRestrictionsFailedCount++;
+					return false;
+				}
+			}
+			i += teamSize;
 		}
 
 		return true;
