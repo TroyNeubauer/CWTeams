@@ -8,6 +8,7 @@ import javax.imageio.ImageIO;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
 
 public class RatingsReader
 {
@@ -17,7 +18,7 @@ public class RatingsReader
 		List<CWPlayer> result = new ArrayList<CWPlayer>();
 		try
 		{
-			final File ratingsHtml = new File("out/ratings.html");
+			final File ratingsHtml = new File("out/ratings.html.gz");
 			final File ratingsImage = new File("out/ratings.png");
 			final File outDir = new File("out");
 
@@ -36,10 +37,11 @@ public class RatingsReader
 				String html = writer.toString();
 				if (cwFile.lastModified() > ratingsHtml.lastModified())
 				{
+					//Use gzip so github doesn't think this is an evil html project
 					Main.info("Saving the html file");
-					FileOutputStream stream = new FileOutputStream(ratingsHtml);
-					stream.write(html.getBytes());
-					stream.close();
+					GZIPOutputStream gzip = new GZIPOutputStream(new FileOutputStream(ratingsHtml));
+					gzip.write(html.getBytes());
+					gzip.close();
 				}
 				else
 				{
