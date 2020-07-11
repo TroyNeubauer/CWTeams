@@ -4,18 +4,13 @@ package com.troy.cwteams;
 import com.diogonunes.jcolor.Ansi;
 import com.diogonunes.jcolor.Attribute;
 import net.sourceforge.argparse4j.ArgumentParsers;
-import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.List;
 
 class Main
@@ -65,7 +60,7 @@ class Main
 				.help("Sets a limit for the max number of permeated teams to be generated");
 
 		parser.addArgument("--teams", "-t")
-				.dest("teams").setDefault(5).type(Integer.class)
+				.dest("teams").required(true).type(Integer.class)
 				.help("How many teams should be made from the bundle of players");
 
 		parser.addArgument("--separate", "-r")
@@ -113,7 +108,7 @@ class Main
 			info("Using a max deviation of +-" + maxDev + " rating points");
 			info("Using a timeout of " + timeout + " seconds");
 			info("Limiting output to " + limitOutput + " permutations");
-			info("Generating " + teamCount + "teams with a total playerbase of " + players.size() + " players");
+			info("Generating " + teamCount + " teams with a total playerbase of " + players.size() + " players");
 			GenerateTeams.gen(players, restrictions, maxDev, limitOutput, teamCount, output, sort, timeout);
 			if (outputFile != null)
 			{

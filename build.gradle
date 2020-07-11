@@ -26,6 +26,8 @@ dependencies {
     compile group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2'
     compile group: 'com.diogonunes', name: 'JColor', version: '5.0.0'
     compile group: 'net.sourceforge.argparse4j', name: 'argparse4j', version: '0.8.1'
+    compile 'org.apache.poi:poi-examples:4.1.2'
+    compile group: 'gui.ava', name: 'html2image', version: '2.0.1'
 
 }
 

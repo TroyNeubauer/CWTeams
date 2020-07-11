@@ -1,12 +1,11 @@
 package com.troy.cwteams;
 
+import gui.ava.html.Html2Image;
 import org.apache.commons.math3.util.Pair;
-import org.apache.poi.ss.formula.functions.Column;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.File;
-import java.io.FileInputStream;
+import javax.imageio.ImageIO;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,9 +18,27 @@ public class RatingsReader
 		try
 		{
 			FileInputStream inputStream = new FileInputStream(cwFile);
-			Workbook workbook = new XSSFWorkbook(inputStream);
+			Workbook workbook = WorkbookFactory.create(inputStream);
 			Main.success("Opened excel file successfully!");
 
+			Main.info("Converting excel sheet into HTML");
+			StringWriter writer = new StringWriter();
+			ToHtml toHtml = ToHtml.create(workbook, writer);
+			toHtml.setCompleteHTML(true);
+			toHtml.printPage();
+			String html = writer.toString();
+
+			new File("out").mkdir();
+			Main.info("Saving the html file");
+			FileOutputStream stream = new FileOutputStream("out/ratings.html");
+			stream.write(html.getBytes());
+			stream.close();
+
+			Main.info("Rendering the html to an image");
+			Html2Image imageGenerator = Html2Image.fromHtml(html);
+			ImageIO.write(imageGenerator.getImageRenderer().getBufferedImage(), "png", new File("out/ratings.png"));
+
+			Main.info("Processing sheet...");
 			if (workbook.getNumberOfSheets() > 1)
 			{
 				Main.warn("Excel file contains mutiple sheets! Choosing the first one");
