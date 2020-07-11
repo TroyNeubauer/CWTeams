@@ -1,6 +1,6 @@
 package com.troy.cwteams;
 
-import gui.ava.html.Html2Image;
+//import gui.ava.html.Html2Image;
 import org.apache.commons.math3.util.Pair;
 import org.apache.poi.ss.usermodel.*;
 
@@ -26,7 +26,7 @@ public class RatingsReader
 			Workbook workbook = WorkbookFactory.create(inputStream);
 			Main.success("Opened excel file successfully!");
 
-			if (!outDir.exists() || cwFile.lastModified() > ratingsHtml.lastModified() || cwFile.lastModified() > ratingsImage.lastModified())
+			if (!outDir.exists() || cwFile.lastModified() > ratingsHtml.lastModified()/* || cwFile.lastModified() > ratingsImage.lastModified()*/)
 			{
 				outDir.mkdir();
 				Main.info("Converting excel sheet into HTML");
@@ -48,7 +48,7 @@ public class RatingsReader
 					Main.info("ratings html file up to date. Skipping action");
 				}
 
-				if (cwFile.lastModified() > ratingsImage.lastModified())
+/*				if (cwFile.lastModified() > ratingsImage.lastModified())
 				{
 					Main.info("Rendering the html to an image");
 					Html2Image imageGenerator = Html2Image.fromHtml(html);
@@ -57,7 +57,7 @@ public class RatingsReader
 				else
 				{
 					Main.info("ratings png file up to date. Skipping action");
-				}
+				}*/
 			}
 			else
 			{
