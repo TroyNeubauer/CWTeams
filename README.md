@@ -10,22 +10,20 @@ Gradle: Can be downlaoded here https://gradle.org/install/. Gradle is used as th
 
 Git: Can be downlaoded here https://git-scm.com/downloads. Git allows you to download the source code from this repository and get updates as new commits are pushed
 
-# Building
-Once the dependencies are met, open a [command prompt](https://tutorial.djangogirls.org/en/intro_to_command_line) and type 'git clone https://github.com/TroyNeubauer/CWTeams.git'. This will download the soource code to your local machine. If you get an error that git cant be found then double check that you added it your path or try restarting your terminal.
-Run 'cd CWTeams'
-and run `gradlew.bat jar` (windows) or `./gradlew jar` (OSX and Linux).
+# Setup
+Once the dependencies are met, open a [command prompt](https://tutorial.djangogirls.org/en/intro_to_command_line) and type `git clone https://github.com/TroyNeubauer/CWTeams.git`. This will download the soource code to your local machine. If you get an error that git cant be found then double check that you added it your path or try restarting your terminal.
+Run `cd CWTeams` to navigate to the source code
 
-This should print some output indicating the program was compiled successfully.
-There should noiw be an executable jar file inside build/libs.
+Next execute `gradlew.bat run` (windows) or `./gradlew run` (OSX and Linux) to compile and run the program. 
 
 
 # Usage
 This utility comes with many command line arguments that allow you to tweak the resulting teams to your liking.
-After building, run `java -jar build/libs/CWTeams.jar`
+You can specify additional agruments that effect how the program runs with `./gradlew run --args='INSERT PROGRAM ARGS HERE'`
 
-By default this program will look for a ratings file named `cw.xlsx` in the current directory. This can be overridden with `--file=other_cake_wars_file.xlsx` to make the program read `other_cake_wars_file.xlsx` instead.
+Initally the program will fail because it doesnt know how many teams to generate. Use `--teams=X` to specity this value Eg. `gradlew.bat run --args='--teams=2'` on windows or `./gradlew run --args='--teams=2'` for non-windows. If the number of players doesnt evenly divide into the team count then the program will properly handle balencing 3v2's 5v6's etc.
 
-The program will create five teams but this can be specified with `--teams=X`. For example to read the excel file and create 2 balanced teams use `java -jar build/libs/CWTeams.jar --teams=2`. If the number of players doesnt evenly divide into the team count then the program will properly handle balencing 3v2's 5v6's etc.
+The program will look for a ratings file named `cw.xlsx` in the current directory. This can be overridden with `--file=other_cake_wars_file.xlsx` to make the program read `other_cake_wars_file.xlsx` instead.
 
 By default the program will only output a set of teams which are within +-1 rating of each other. This can be restricted or widened with `--max-deviation=0.5` to ensure that all matches include teams within +-0.5 RP for example.
 
@@ -37,7 +35,7 @@ Once the program generates 1000 valid teams for the given configurations, it wil
 
 ## Normal Usage examples
 
-`java -jar build/libs/CWTeams.jar --limit=1000 --teams=5 --separate smexy100:awesomeyu smexy100:awesomeyu ertrterw:anthonyyu46 anthonyyu46:thecleanerplate --output=teams.txt --timeout=5`
+`./gradlew run --args='--limit=10000 --teams=5 --separate smexy100:awesomeyu smexy100:awesomeyu ertrterw:anthonyyu46 anthonyyu46:thecleanerplate --output=teams.txt --timeout=5'`
 
 The command above was used to generate 1000 different 5 man teams using the seperation rules, failing after 5 seconds of inactivity, and writing the final sorted team list to teams.txt.
 
