@@ -17,26 +17,50 @@ public class RatingsReader
 		List<CWPlayer> result = new ArrayList<CWPlayer>();
 		try
 		{
+			final File ratingsHtml = new File("out/ratings.html");
+			final File ratingsImage = new File("out/ratings.png");
+			final File outDir = new File("out");
+
 			FileInputStream inputStream = new FileInputStream(cwFile);
 			Workbook workbook = WorkbookFactory.create(inputStream);
 			Main.success("Opened excel file successfully!");
 
-			Main.info("Converting excel sheet into HTML");
-			StringWriter writer = new StringWriter();
-			ToHtml toHtml = ToHtml.create(workbook, writer);
-			toHtml.setCompleteHTML(true);
-			toHtml.printPage();
-			String html = writer.toString();
+			if (!outDir.exists() || cwFile.lastModified() > ratingsHtml.lastModified() || cwFile.lastModified() > ratingsImage.lastModified())
+			{
+				outDir.mkdir();
+				Main.info("Converting excel sheet into HTML");
+				StringWriter writer = new StringWriter();
+				ToHtml toHtml = ToHtml.create(workbook, writer);
+				toHtml.setCompleteHTML(true);
+				toHtml.printPage();
+				String html = writer.toString();
+				if (cwFile.lastModified() > ratingsHtml.lastModified())
+				{
+					Main.info("Saving the html file");
+					FileOutputStream stream = new FileOutputStream(ratingsHtml);
+					stream.write(html.getBytes());
+					stream.close();
+				}
+				else
+				{
+					Main.info("ratings html file up to date. Skipping action");
+				}
 
-			new File("out").mkdir();
-			Main.info("Saving the html file");
-			FileOutputStream stream = new FileOutputStream("out/ratings.html");
-			stream.write(html.getBytes());
-			stream.close();
-
-			Main.info("Rendering the html to an image");
-			Html2Image imageGenerator = Html2Image.fromHtml(html);
-			ImageIO.write(imageGenerator.getImageRenderer().getBufferedImage(), "png", new File("out/ratings.png"));
+				if (cwFile.lastModified() > ratingsImage.lastModified())
+				{
+					Main.info("Rendering the html to an image");
+					Html2Image imageGenerator = Html2Image.fromHtml(html);
+					ImageIO.write(imageGenerator.getImageRenderer().getBufferedImage(), "png", ratingsImage);
+				}
+				else
+				{
+					Main.info("ratings png file up to date. Skipping action");
+				}
+			}
+			else
+			{
+				Main.info("Generated resources up to date (ratings.html and ratings.png)");
+			}
 
 			Main.info("Processing sheet...");
 			if (workbook.getNumberOfSheets() > 1)
