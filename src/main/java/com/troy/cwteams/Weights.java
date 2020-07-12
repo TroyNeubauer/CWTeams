@@ -42,7 +42,7 @@ public class Weights
 			if (!optionalAverage.isPresent()) { Main.fatal("Failed to average numbers " + Arrays.toString(teamSizes)); return null; }
 
 			String oldQuery = query;
-			query = ((int) optionalAverage.getAsDouble()) + "v";
+			query = ((int) (Math.floor(optionalAverage.getAsDouble() + 0.49999))) + "v";
 
 			Main.info("Failed to find \"" + oldQuery + "\". Searching for situation \"" + query + "\" in the situations pool");
 			data = weightsMap.get(query);
