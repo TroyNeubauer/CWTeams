@@ -51,6 +51,10 @@ class Main
 				.dest("file").setDefault("cw.xlsx")
 				.help("Specifies the input file to get the player list and ranking matrix");
 
+		parser.addArgument("--weights-file", "-wf")
+				.dest("weights-file").setDefault("weights.xlsx")
+				.help("Specifies the file containing weights for different team sizes");
+
 		parser.addArgument("--max-deviation", "-m")
 				.dest("maxDev").setDefault(1.0).type(Double.class)
 				.help("Indicates the max deviation in the total ranking across teams");
@@ -83,6 +87,7 @@ class Main
 		try
 		{
 			Namespace res = parser.parseArgs(args);
+
 			String fileStr = res.get("file");
 			File cwFile = new File(fileStr);
 			if (!cwFile.exists())
@@ -90,6 +95,16 @@ class Main
 				fatal("Failed to find file \"" + fileStr + "\"");
 			}
 			success("Found input file \"" + fileStr + "\"");
+
+			String weightsFileStr = res.get("weights-file");
+			File weightsFile = new File(weightsFileStr);
+			if (!weightsFile.exists())
+			{
+				fatal("Failed to find weights file \"" + fileStr + "\"");
+			}
+			success("Found input weights file \"" + weightsFile + "\"");
+
+			Weights weights = Weights.load(weightsFile);
 
 			List<CWPlayer> players = RatingsReader.parsePlayers(cwFile);
 			List<PlayerRestrictor.PlayerRestriction> restrictions = PlayerRestrictor.restrict(players, res.get("restrictions"));
@@ -109,7 +124,7 @@ class Main
 			info("Using a timeout of " + timeout + " seconds");
 			info("Limiting output to " + limitOutput + " permutations");
 			info("Generating " + teamCount + " teams with a total playerbase of " + players.size() + " players");
-			GenerateTeams.gen(players, restrictions, maxDev, limitOutput, teamCount, output, sort, timeout);
+			GenerateTeams.gen(players, restrictions, weights, maxDev, limitOutput, teamCount, output, sort, timeout);
 			if (outputFile != null)
 			{
 				output.close();

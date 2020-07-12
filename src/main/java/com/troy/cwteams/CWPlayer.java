@@ -13,20 +13,25 @@ public class CWPlayer implements Comparable<CWPlayer>
 	{
 		this.realName = realName;
 		this.username = username;
+
 		this.pvp = pvp;
 		this.gamesense = gamesense;
 		this.teamwork = teamwork;
 	}
 
-	public double getOverall()
+	public double getOverall(Weights.WeightsData weights)
 	{
-		//Average
-		return (pvp + gamesense + teamwork) / 3.0;
+		return weights.pvp * this.pvp + weights.gamesense * this.gamesense + weights.teamwork * this.teamwork;
+	}
+
+	public double getUnWeightedOverall()
+	{
+		return (this.pvp + this.gamesense + this.teamwork) / 3.0;
 	}
 
 	@Override
 	public int compareTo(CWPlayer cwPlayer)
 	{
-		return Double.compare(this.getOverall(), cwPlayer.getOverall());
+		return Double.compare(this.getUnWeightedOverall(), cwPlayer.getUnWeightedOverall());
 	}
 }
