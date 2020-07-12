@@ -125,7 +125,7 @@ public class GenerateTeams
 			@Override
 			public int compare(int[] a, int[] b)
 			{
-				return Double.compare(getTeamsDeltaStrength(players, weights, a, teamSizes), getTeamsDeltaStrength(players, weights, b, teamSizes));
+				return -Double.compare(getTeamsDeltaStrength(players, weights, a, teamSizes), getTeamsDeltaStrength(players, weights, b, teamSizes));
 			}
 		});
 		int i = 0;

@@ -17,15 +17,17 @@ public class RatingsReader
 		List<CWPlayer> result = new ArrayList<CWPlayer>();
 		try
 		{
-			final File ratingsHtml = new File("out/ratings.html.gz");
-			final File ratingsImage = new File("out/ratings.png");
-			final File outDir = new File("out");
-
 			FileInputStream inputStream = new FileInputStream(cwFile);
 			Workbook workbook = WorkbookFactory.create(inputStream);
 			Main.success("Opened excel file successfully!");
 
-			if (!outDir.exists() || cwFile.lastModified() > ratingsHtml.lastModified()/* || cwFile.lastModified() > ratingsImage.lastModified()*/)
+			/*
+			final File ratingsHtml = new File("out/ratings.html.gz");
+			final File ratingsImage = new File("out/ratings.png");
+			final File outDir = new File("out");
+
+
+			if (!outDir.exists() || cwFile.lastModified() > ratingsHtml.lastModified() || cwFile.lastModified() > ratingsImage.lastModified())
 			{
 				outDir.mkdir();
 				Main.info("Converting excel sheet into HTML");
@@ -47,7 +49,7 @@ public class RatingsReader
 					Main.info("ratings html file up to date. Skipping action");
 				}
 
-/*				if (cwFile.lastModified() > ratingsImage.lastModified())
+				if (cwFile.lastModified() > ratingsImage.lastModified())
 				{
 					Main.info("Rendering the html to an image");
 					Html2Image imageGenerator = Html2Image.fromHtml(html);
@@ -56,12 +58,12 @@ public class RatingsReader
 				else
 				{
 					Main.info("ratings png file up to date. Skipping action");
-				}*/
+				}
 			}
 			else
 			{
 				Main.info("Generated resources up to date (ratings.html and ratings.png)");
-			}
+			}*/
 
 			Main.info("Processing sheet...");
 			if (workbook.getNumberOfSheets() > 1)
